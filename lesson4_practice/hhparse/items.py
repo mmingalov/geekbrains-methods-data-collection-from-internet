@@ -31,6 +31,7 @@ class hhparseItem(scrapy.Item):
     company_name = scrapy.Field(output_processor = TakeFirst())
     # company_link = scrapy.Field(input_processor = MapCompose(modify_link)) #сохраняет в список
     company_link = scrapy.Field(output_processor=modify_link)
+    company_logo = scrapy.Field(output_processor=modify_link)
 
     # url = scrapy.Field()
     # title = scrapy.Field()

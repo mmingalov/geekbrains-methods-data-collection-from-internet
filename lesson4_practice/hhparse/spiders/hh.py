@@ -21,15 +21,16 @@ class HhSpider(scrapy.Spider):
 
     def post_parse(self, response: HtmlResponse):
 
-        # item = hhparseItem(
-        #     url=response.url,
-        #     title= response.xpath('//h1/span/text()').extract_first(), # title=response.xpath('//h1[@class="header"]/span/text()').extract_first,
-        #     salary = ''.join(response.xpath('//div[@class="vacancy-title"]/p[@class="vacancy-salary"]/text()').extract()).replace('\xa0',''),
-        #
-        #     skills=response.xpath('//div[@class="vacancy-description"]//div[@class="vacancy-section"]//span[@data-qa="bloko-tag__text"]/text()').extract(),
-        #     company_name=response.xpath('//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/span[@itemprop="name"]/span/text()').extract_first(),
-        #     company_link=response.xpath('//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/@href').extract(),
-        # )
+        item = hhparseItem(
+            url=response.url,
+            title= response.xpath('//h1/span/text()').extract_first(), # title=response.xpath('//h1[@class="header"]/span/text()').extract_first,
+            salary = ''.join(response.xpath('//div[@class="vacancy-title"]/p[@class="vacancy-salary"]/text()').extract()).replace('\xa0',''),
+
+            skills=response.xpath('//div[@class="vacancy-description"]//div[@class="vacancy-section"]//span[@data-qa="bloko-tag__text"]/text()').extract(),
+            company_name=response.xpath('//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/span[@itemprop="name"]/span/text()').extract_first(),
+            company_link=response.xpath('//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/@href').extract(),
+            company_logo=response.xpath('//div[@class="vacancy-company-wrapper"]//img/@src').extract_first()
+        )
 
         item = ItemLoader(hhparseItem(),response)
         item.add_value('url', response.url)
@@ -38,7 +39,7 @@ class HhSpider(scrapy.Spider):
         item.add_xpath('skills','//div[@class="vacancy-description"]//div[@class="vacancy-section"]//span[@data-qa="bloko-tag__text"]/text()')
         item.add_xpath('company_name','//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/span[@itemprop="name"]/span/text()')
         item.add_xpath('company_link','//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/@href')
-
+        item.add_xpath('company_logo','//div[@class="vacancy-company-wrapper"]//img/@src')
         yield item.load_item()
 
 # Заголовок
@@ -47,3 +48,4 @@ class HhSpider(scrapy.Spider):
 # Список ключевых навыков
 # Название организации разместившей вакансию
 # Ссылка на страницу организации разместившей организацию
+# Ссылку на логотип организации

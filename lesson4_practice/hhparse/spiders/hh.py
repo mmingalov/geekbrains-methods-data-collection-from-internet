@@ -21,16 +21,16 @@ class HhSpider(scrapy.Spider):
 
     def post_parse(self, response: HtmlResponse):
 
-        item = hhparseItem(
-            url=response.url,
-            title= response.xpath('//h1/span/text()').extract_first(), # title=response.xpath('//h1[@class="header"]/span/text()').extract_first,
-            salary = ''.join(response.xpath('//div[@class="vacancy-title"]/p[@class="vacancy-salary"]/text()').extract()).replace('\xa0',''),
-
-            skills=response.xpath('//div[@class="vacancy-description"]//div[@class="vacancy-section"]//span[@data-qa="bloko-tag__text"]/text()').extract(),
-            company_name=response.xpath('//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/span[@itemprop="name"]/span/text()').extract_first(),
-            company_link=response.xpath('//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/@href').extract(),
-            company_logo=response.xpath('//div[@class="vacancy-company-wrapper"]//img/@src').extract_first()
-        )
+        # item = hhparseItem(
+        #     url=response.url,
+        #     title= response.xpath('//h1/span/text()').extract_first(), # title=response.xpath('//h1[@class="header"]/span/text()').extract_first,
+        #     salary = ''.join(response.xpath('//div[@class="vacancy-title"]/p[@class="vacancy-salary"]/text()').extract()).replace('\xa0',''),
+        #
+        #     skills=response.xpath('//div[@class="vacancy-description"]//div[@class="vacancy-section"]//span[@data-qa="bloko-tag__text"]/text()').extract(),
+        #     company_name=response.xpath('//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/span[@itemprop="name"]/span/text()').extract_first(),
+        #     company_link=response.xpath('//div[@class="vacancy-company-wrapper"]/div[@data-qa="vacancy-company"]//a[@itemprop="hiringOrganization"]/@href').extract(),
+        #     company_logo=response.xpath('//div[@class="vacancy-company-wrapper"]//img/@src').extract_first()
+        # )
 
         item = ItemLoader(hhparseItem(),response)
         item.add_value('url', response.url)

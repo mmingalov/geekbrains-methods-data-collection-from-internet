@@ -24,7 +24,7 @@ class InstagramSpider(scrapy.Spider):
     insta_login = 'gb_scarto'
     inst_pass = 'scartohorse123'
     inst_login_link = 'https://www.instagram.com/accounts/login/ajax/'
-    parse_user = 'vol3397'
+    parse_user = ['vol3397','maximmingalov']
     graphql_url = 'https://www.instagram.com/graphql/query/?'
 
     user_data_hash = 'c9100bf9110dd6361671f113dd02e7d6'
@@ -45,11 +45,13 @@ class InstagramSpider(scrapy.Spider):
     def user_parse(self, response: HtmlResponse):
         j_body = json.loads(response.text)
         if j_body['authenticated']:
-            yield response.follow(
-                f'/{self.parse_user}',
-                callback=self.userdata_parse,
-                cb_kwargs={'username': self.parse_user}
-            )
+            #цикл по пользователям, которых парсим
+            for pu in self.parse_user:
+                yield response.follow(
+                    f'/{pu}',   #self.parse_user
+                    callback=self.userdata_parse,
+                    cb_kwargs={'username': pu} #self.parse_user
+                )
 
     def userdata_parse(self, response: HtmlResponse, username):
         #нам нужно собрать запрос к API
@@ -120,7 +122,7 @@ class InstagramSpider(scrapy.Spider):
         item = ItemLoader(InstaItem(), response)
 
         item.add_value('user_id', user_id)
-        item.add_value('user_name', self.parse_user)
+        item.add_value('user_name', username)
         item.add_value('followers', j_followers_data)
         item.add_value('following', j_following_data)
 

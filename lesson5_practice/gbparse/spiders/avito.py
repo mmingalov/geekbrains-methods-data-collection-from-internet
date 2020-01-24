@@ -2,7 +2,7 @@
 import scrapy
 from scrapy.http import HtmlResponse
 from scrapy.loader import ItemLoader
-from lesson5_practice.gbparse.items import AvitoItem
+from lesson5_practice.gbparse.items import InstaItem
 
 
 

@@ -26,7 +26,11 @@ class InstagramSpider(scrapy.Spider):
     inst_login_link = 'https://www.instagram.com/accounts/login/ajax/'
     parse_user = 'vol3397'
     graphql_url = 'https://www.instagram.com/graphql/query/?'
+
     user_data_hash = 'c9100bf9110dd6361671f113dd02e7d6'
+    followers_data_hash = HASHES["followers"]
+    following_data_hash = HASHES["following"]
+    pass
 
     def parse(self, response: HtmlResponse):
         csrf_token = self.fetch_csrf_token(response.text)
@@ -56,23 +60,69 @@ class InstagramSpider(scrapy.Spider):
             "include_reel": True,
             "include_logged_out_extras": False,
         }
+
         url = f'{self.graphql_url}query_hash={self.user_data_hash}&{urlencode(varibles)}' #urlencode кодирует наш словарик для корректной передачи в параметры запроса
+
+        pass
         #получили ссылку для запроса к API
         yield response.follow(
             url,
-            callback=self.user_data,
-            cb_kwargs={'username': username}
+            callback=self.user_followers,
+            cb_kwargs={'username': username,
+                       'user_id': user_id}
+        )
+        pass
+
+    def user_followers(self, response: HtmlResponse, username, user_id):
+        j_user_data = json.loads(response.text)
+        variables_followers = {
+            'id': user_id,
+            'include_reel': True,
+            'fetch_mutual': False,
+            'first': 24,
+            'after': ''
+        }
+        url1 = f'{self.graphql_url}query_hash={self.followers_data_hash}&{urlencode(variables_followers)}'  # urlencode кодирует наш словарик для корректной передачи в параметры запроса
+        # url2 = f'{self.graphql_url}query_hash={self.following_data_hash}&{urlencode(varibles)}'  # urlencode кодирует наш словарик для корректной передачи в параметры запроса
+        pass
+        yield response.follow(
+            url1,
+            callback=self.user_following,
+            cb_kwargs={'username': username,
+                       'user_id': user_id,
+                       'j_user_data': j_user_data
+                       }
         )
 
+    def user_following(self, response: HtmlResponse, username, user_id, j_user_data):
+        j_followers_data = json.loads(response.text)
+        variables_following = {
+            'id': user_id,
+            'include_reel': True,
+            'fetch_mutual': False,
+            'first': 24,
+            'after': ''
+        }
+        url2 = f'{self.graphql_url}query_hash={self.following_data_hash}&{urlencode(variables_following)}'  # urlencode кодирует наш словарик для корректной передачи в параметры запроса
+        pass
+        yield response.follow(
+            url2,
+            callback=self.process_Item,
+            cb_kwargs={'username': username,
+                       'user_id': user_id,
+                       'j_user_data': j_user_data,
+                       'j_followers_data': j_followers_data
+                       }
+        )
 
-    def user_data(self, response: HtmlResponse, username):
-        j_user_data = json.loads(response.text)
-
+    def process_Item(self, response: HtmlResponse, j_user_data, username,user_id, j_followers_data):
+        j_following_data = json.loads(response.text)
         item = ItemLoader(InstaItem(), response)
-        # item.add_value('url', response.url)
-        item.add_value('dict', j_user_data)
-        item.add_value('url', response.url)
-        item.add_value('user_id', response.user_id)
+
+        item.add_value('user_id', user_id)
+        item.add_value('user_name', self.parse_user)
+        item.add_value('followers', j_followers_data)
+        item.add_value('following', j_following_data)
 
         yield item.load_item()
 

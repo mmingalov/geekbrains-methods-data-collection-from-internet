@@ -37,9 +37,10 @@ def dict_params(items):
 class InstaItem(scrapy.Item):
     # define the fields for your item here like:
     _id = scrapy.Field()
-    dict = scrapy.Field()
-    url = scrapy.Field()
-    user_id = scrapy.Field()
+    user_id = scrapy.Field(output_processor = TakeFirst())
+    user_name = scrapy.Field(output_processor = TakeFirst())
+    followers = scrapy.Field()
+    following = scrapy.Field()
     pass
 
 # class GbparseItem(scrapy.Item):

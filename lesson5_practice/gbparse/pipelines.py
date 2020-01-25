@@ -10,19 +10,11 @@ from scrapy.pipelines.images import ImagesPipeline
 
 mongo_client = MongoClient()
 
-
-class GbparsePipeline(object):
-
-    def process_item(self, item, spider):
-        database = mongo_client[spider.name]
-        collection = database['gb_parse_17_01']
-        collection.insert_one(item)
-        return item
-
 class InstaPipeline(object):
     def process_item(self, item, spider):
         database = mongo_client[spider.name]
-        collection = database['instagram_24_01']
+        #collection = database['instagram_24_01']
+        collection = database[type(item).__name__]
         collection.insert_one(item)
         return item
 

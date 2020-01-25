@@ -56,15 +56,18 @@ class InstaItem(scrapy.Item):
     following = scrapy.Field(input_processor=MapCompose(get_following_edges))
     pass
 
-# class GbparseItem(scrapy.Item):
-#     # define the fields for your item here like:
-#     # name = scrapy.Field()
-#     pass
-#
-#
-# class AvitoItem(scrapy.Item):
-#     _id = scrapy.Field()
-#     url = scrapy.Field(output_processor=TakeFirst())
-#     photos = scrapy.Field(input_processor=MapCompose(cleaner_photo))
-#     title = scrapy.Field(output_processor=TakeFirst())
-#     params = scrapy.Field(input_processor=MapCompose(cleaner_params), output_processor=dict_params)
+class FollowersItem(scrapy.Item):
+    _id = scrapy.Field()
+    user_id = scrapy.Field()
+    user_name = scrapy.Field()
+    follower_id = scrapy.Field()
+    follower_name = scrapy.Field()
+    data = scrapy.Field()
+
+class FollowingItem(scrapy.Item):
+    _id = scrapy.Field()
+    user_id = scrapy.Field()
+    user_name = scrapy.Field()
+    following_id = scrapy.Field()
+    following_name = scrapy.Field()
+    data = scrapy.Field()

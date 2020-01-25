@@ -7,7 +7,6 @@ if __name__ == '__main__':
     scr_settings = Settings()
     scr_settings.setmodule(settings)
     process = CrawlerProcess(settings=scr_settings)
-    # process.crawl(GeekbrainsSpider)
     process.crawl(InstagramSpider)
     process.start()
 

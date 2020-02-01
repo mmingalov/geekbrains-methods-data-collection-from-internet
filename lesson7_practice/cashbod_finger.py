@@ -4,7 +4,7 @@ from PIL import Image
 import pytesseract
 import time
 import os
-from lesson7_practice.gbparse.items import NotReadedItem, NumbersItem
+
 
 def extract_pdf_image(pdf_path):
     try:
@@ -84,13 +84,25 @@ def extract_number(file_path):
     # todo при отсутсвии распознавания вернуть соответсвующее сообщение или error
     return result
 
-
+# Задача: обойти все файлы из архива https://yadi.sk/d/q5kuiXh0YG9GCQ
+# Необходимо найти заводские серийные номера кассовых аппаратов из изображений и страниц PDF файлов.
+#
+# В конечном результате должна полуичться MongoDb база данных в которой явно и наглядно понятно из какого изначального файла был добыт номер или несколько номеров.
+# Так же должна быть коллекция в БД в которой указаны пути к файлам из которых не удалось извлечь номера с указанием страницы если изначально это PDF документ.
 
 if __name__ == '__main__':
+    from pymongo import MongoClient
+    try:
+        conn = MongoClient()
+    except:
+        print("Could not connect to MongoDB")
+    # database
+    db = conn.Numberdatabase
+
     # Файлов: 1 220;
     # папок: 234
-    source_folder = "C:\\temp\\СКД_Поверка весов"  #C:\temp\СКД_Поверка весов
-    images_folder = "C:\\temp\\_images" #создадим директорию для images
+    source_folder = "C:\\temp\\СКД_Поверка весов"  #исходная директория с PDF и JPG
+    images_folder = "C:\\temp\\_images" #директория для images
 
     try:
         os.mkdir(images_folder, mode=0o777) #, *, dir_fd=None)
@@ -100,7 +112,7 @@ if __name__ == '__main__':
     source_files_pdf = []
     source_files_img = []
     unprocessed_files = []
-    unopened_files = []
+    unopened_files = [] #список файлов, что вообще не открылись
 
     # todo Отсортировать файлы jpg и pdf
     for top, dirs, files in os.walk(source_folder):
@@ -115,34 +127,59 @@ if __name__ == '__main__':
     # соберем все файлы в папку image_path, сконвертировав при этом PDF в JPG
 
     # todo Извлечь jpg из pdf и сохранить в папке изображений
-    # todo не забыть про формат имен файлов
+    # todo необработанные файлы сразу поместим в отдельную коллекцию
+    collection = db.FailedPDF  # Created or Switched to collection
     image_path = images_folder #сюда сохраним все исходные JPG и сконвертированные PDF->JPG
-    # for idx,item in enumerate(source_files_pdf):
-    #     pdf_result = extract_pdf_image(item) #pdf_file_path = 'data_for_parse/8416_4.pdf'  #
-    #     if pdf_result!=None:    #случай, когда файл не открылся вообще
-    #         file_name = os.path.basename(item)
-    #         action = save_pdf_image(file_name, image_path, *pdf_result)
-    #         if action<0:
-    #             unprocessed_files.append(item)
-    #     else:
-    #         unopened_files.append(item) #не открыается вообще
+    for idx,item in enumerate(source_files_pdf):
+        pdf_result = extract_pdf_image(item) #pdf_file_path = 'data_for_parse/8416_4.pdf'  #
+        if pdf_result!=None:    #случай, когда файл не открылся вообще
+            file_name = os.path.basename(item)
+            action = save_pdf_image(file_name, image_path, *pdf_result)
+            if action<0:
+                unprocessed_files.append(item)
+                num_dict = {
+                    "file": item,
+                    "is_opened": True,
+                    "is_saved_to_img": False,
+                }
+                rec_id1 = collection.insert_one(num_dict)
 
+        else:
+            unopened_files.append(item) #не открыается вообще
+            num_dict = {
+                "file": item,
+                "is_opened": False,
+                "is_saved_to_img": False,
+            }
+            rec_id1 = collection.insert_one(num_dict)
+
+    # todo исходные JPG тоже скопируем в папку images_folder
     # for idx, item in enumerate(source_files_img):
     #     file_name = os.path.basename(item)
     #     new_path = os.path.join(images_folder,file_name)
     #     shutil.copy2(item, new_path)
 
+    # todo корректно настроить tesseract
+    # 1 - устанавливаем пакет из данной ссылки
     # https://github.com/UB-Mannheim/tesseract/wiki
+    # 2 - запускаем EXE C:\Program Files\Tesseract-OCR\tesseract.exe
+    # 3 файл rus.traineddata помещаем в папку C:\Program Files\Tesseract-OCR\tessdata
+
     pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
+    # todo сохранить все извлеченные номера в БД MONGO
+    collection = db.ExtractedNumbers    #Created or Switched to collection
     for top, dirs, files in os.walk(images_folder):
         for nm in files:
             full_path = os.path.join(top, nm)
             res = extract_number(full_path)
-            print(full_path, res)
+            # print(full_path, res)
+            num_dict = {
+                "file": full_path,
+                "number": res,
+                "is_extracted": len(res)>0,
+            }
 
-            item = NumbersItem(
-                                number=res,
-                                file = full_path,
-                                         )
-# todo сохранить все в БД MONGO
+            # Insert Data
+            rec_id1 = collection.insert_one(num_dict)
+

@@ -60,8 +60,10 @@ if __name__ == '__main__':
     DEPTH_LEVEL = 3 #ограничение глубины поиска. Единица соответствует прямой связи, двойка -- связи через 1-го человека, тройка -- связи через двух человек.
     USER1 = 'https://vk.com/id6244012'
     # USER2 = 'https://vk.com/id30870147' #связь прямая
-    # USER2 = 'https://vk.com/id7704548'  #Александра Бегун, через 1-го -- три разных графа
-    USER2 = 'https://vk.com/id9787523' #Евгения Леонтьева, через 1-го -- три разных графа, через 2-их три разных графа
+    USER2 = 'https://vk.com/id7704548'  #Александра Бегун, через 1-го -- три разных графа
+    # USER2 = 'https://vk.com/id9787523' #Евгения Леонтьева, через 1-го -- три разных графа, через 2-их три разных графа
+
+# main
     user1_id = int(USER1.replace('https://vk.com/id','').replace('https://vk.com/',''))
     user2_id = int(USER2.replace('https://vk.com/id', '').replace('https://vk.com/', ''))
     access_token = 'a1ff3cbff9d54f3d0c8383b51955b449fb63fb0f06fb11d00f315c2643326cc14d716346fb449663c483f'
@@ -88,8 +90,8 @@ if __name__ == '__main__':
     while graph_completed == False:
         # graph[0] = user1_id #.append(user1_id)
         # graph[1] = user2_id  #append(user2_id)
-        # user1_friends = [4921405,6182129,278075880] #гегельская, берсенев, рыжова
-        user1_friends = [4921405, 6182129, 278075880, 560056, 803898]  # [гегельская, берсенев, рыжова] - Уровень 1, [зейбель, тимшин] - Уровень 2
+        user1_friends = [4921405,6182129,278075880] #гегельская, берсенев, рыжова
+        # user1_friends = [4921405, 6182129, 278075880, 560056, 803898]  # [гегельская, берсенев, рыжова] - Уровень 1, [зейбель, тимшин] - Уровень 2
 
         for idx, item in enumerate(user1_friends):
             graph = [None] * (DEPTH_LEVEL + 2)  # текущий граф
@@ -98,8 +100,10 @@ if __name__ == '__main__':
             print(f'level: {level}, level_persons: {len(user1_friends)}, processed_user: {item}, last_name: {get_user_info_by_id(item)["response"][0]["last_name"]}, idx: {idx}')
             if search(item, level,graph):
                 graph[level] = item
-                graphs.append(graph.copy())
-                print('Bingo!', graph)
+                graph_ = list(filter(lambda x: x!=None, graph))
+                graph_.append(user2_id)
+                graphs.append(tuple(graph_))   #graph_.copy())
+                print('Bingo!', graph_)
                 pass
                 # break
         graph_completed = True
@@ -112,6 +116,40 @@ if __name__ == '__main__':
     print(f'Найдено графов: {len(graphs)}')
     for i in graphs:
         print(i)
+        t_graph = ''
         for j in i:
-            print(get_username(j))
+            t_graph = t_graph + get_username(j) + ' -- '
+        print(t_graph[:-4])
 
+#todo сохраним коллекцию в MongoDB
+    from pymongo import MongoClient
+    try:
+        conn = MongoClient()
+    except:
+        print("Could not connect to MongoDB")
+    # database
+    db = conn.VK_graph_collection
+    collection = db.Graphs
+
+    for graph in graphs:
+        t_graph = ''
+        for j in i:
+            t_graph = t_graph + get_username(j) + ' -- '
+
+        t_graph2 = t_graph[:-4]
+        graph = {
+            "user1": {
+                "link": USER1,
+                "id": user1_id,
+                "username": get_username(user1_id)
+            },
+            "user2": {
+                "link": USER2,
+                "id": user2_id,
+                "username": get_username(user2_id)
+            },
+
+            "graph_id": graph,
+            "graph_username": t_graph2,
+        }
+        rec_id1 = collection.insert_one(graph)

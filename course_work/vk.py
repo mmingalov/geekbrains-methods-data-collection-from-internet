@@ -4,8 +4,10 @@
 
 #05 Feb 2020
 # https://vk.com/dev/first_guide
+# https://oauth.vk.com/authorize?client_id=7308366&display=page&redirect_uri=https://oauth.vk.com/blank.html&scope=friends&response_type=token&v=5.52
 # https://oauth.vk.com/blank.html#access_token=b26c3fdb5c61ffc4772367e026b45544964f5e61f78b7e495f76aa6aa973b569b4ddc2e73ea9f44cbdb94&expires_in=86400&user_id=6244012
 # https://oauth.vk.com/blank.html#access_token=a1ff3cbff9d54f3d0c8383b51955b449fb63fb0f06fb11d00f315c2643326cc14d716346fb449663c483f&expires_in=86400&user_id=6244012
+# https://oauth.vk.com/blank.html#access_token=bd6e284e05cd008ab187f5d9b2b3febf295114c66ea9f4da3aec3ecfee3182614fe3f4a4edd558f6784b9&expires_in=86400&user_id=6244012
 import requests
 
 def get_user_info_by_id(user: int):
@@ -66,7 +68,7 @@ if __name__ == '__main__':
 # main
     user1_id = int(USER1.replace('https://vk.com/id','').replace('https://vk.com/',''))
     user2_id = int(USER2.replace('https://vk.com/id', '').replace('https://vk.com/', ''))
-    access_token = 'a1ff3cbff9d54f3d0c8383b51955b449fb63fb0f06fb11d00f315c2643326cc14d716346fb449663c483f'
+    access_token = 'bd6e284e05cd008ab187f5d9b2b3febf295114c66ea9f4da3aec3ecfee3182614fe3f4a4edd558f6784b9'
     graph_completed = False
     graph = []  #текущий граф
     graphs = [] #все возможные графы
@@ -128,16 +130,16 @@ if __name__ == '__main__':
     except:
         print("Could not connect to MongoDB")
     # database
-    db = conn.VK_graph_collection
-    collection = db.Graphs
+    db = conn.VK_graphs
+    collection = db.Recursion
 
-    for graph in graphs:
+    for i in graphs:
         t_graph = ''
         for j in i:
             t_graph = t_graph + get_username(j) + ' -- '
 
         t_graph2 = t_graph[:-4]
-        graph = {
+        item = {
             "user1": {
                 "link": USER1,
                 "id": user1_id,
@@ -149,7 +151,7 @@ if __name__ == '__main__':
                 "username": get_username(user2_id)
             },
 
-            "graph_id": graph,
+            "graph_id": i,
             "graph_username": t_graph2,
         }
-        rec_id1 = collection.insert_one(graph)
+        rec_id1 = collection.insert_one(item)

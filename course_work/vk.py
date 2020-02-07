@@ -2,7 +2,7 @@
 # Защищенный ключ aprF938fcdB8R9KrhoLo
 # Сервисный ключ доступа  134464c3134464c3134464c351132be08d11344134464c34d7e56ba71e7144c295bab1c
 
-#05 Feb 2020
+#05-07 Feb 2020
 # https://vk.com/dev/first_guide
 # https://oauth.vk.com/authorize?client_id=7308366&display=page&redirect_uri=https://oauth.vk.com/blank.html&scope=friends&response_type=token&v=5.52
 # https://oauth.vk.com/blank.html#access_token=b26c3fdb5c61ffc4772367e026b45544964f5e61f78b7e495f76aa6aa973b569b4ddc2e73ea9f44cbdb94&expires_in=86400&user_id=6244012

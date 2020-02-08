@@ -8,6 +8,7 @@
 # https://oauth.vk.com/blank.html#access_token=b26c3fdb5c61ffc4772367e026b45544964f5e61f78b7e495f76aa6aa973b569b4ddc2e73ea9f44cbdb94&expires_in=86400&user_id=6244012
 # https://oauth.vk.com/blank.html#access_token=a1ff3cbff9d54f3d0c8383b51955b449fb63fb0f06fb11d00f315c2643326cc14d716346fb449663c483f&expires_in=86400&user_id=6244012
 # https://oauth.vk.com/blank.html#access_token=bd6e284e05cd008ab187f5d9b2b3febf295114c66ea9f4da3aec3ecfee3182614fe3f4a4edd558f6784b9&expires_in=86400&user_id=6244012
+# https://oauth.vk.com/blank.html#access_token=913cbd317b158a61a30b4844eadab0671b7cf5e55fa6331e0745edd44e45f8cfc0780d9044983e6bd25e5&expires_in=86400&user_id=6244012
 import requests
 
 def get_user_info_by_id(user: int):
@@ -68,7 +69,7 @@ if __name__ == '__main__':
 # main
     user1_id = int(USER1.replace('https://vk.com/id','').replace('https://vk.com/',''))
     user2_id = int(USER2.replace('https://vk.com/id', '').replace('https://vk.com/', ''))
-    access_token = 'bd6e284e05cd008ab187f5d9b2b3febf295114c66ea9f4da3aec3ecfee3182614fe3f4a4edd558f6784b9'
+    access_token = '913cbd317b158a61a30b4844eadab0671b7cf5e55fa6331e0745edd44e45f8cfc0780d9044983e6bd25e5'
     graph_completed = False
     graph = []  #текущий граф
     graphs = [] #все возможные графы

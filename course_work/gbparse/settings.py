@@ -13,7 +13,7 @@ BOT_NAME = 'gbparse'
 
 SPIDER_MODULES = ['gbparse.spiders']
 NEWSPIDER_MODULE = 'gbparse.spiders'
-LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'INFO'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Safari/605.1.15'
 

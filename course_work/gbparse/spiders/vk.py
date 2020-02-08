@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
 from scrapy.http import HtmlResponse
-from scrapy.loader import ItemLoader
+from scrapy.exceptions import CloseSpider
 import scrapy
 from urllib.parse import urlencode
 from course_work.gbparse.items import GraphItem
 import vk
+import time
 
 # url = 'https://api.vk.com/method/friends.get?v=5.52&access_token=' + access_token
 #     url = url + '&user_id=' + str(user)
@@ -22,9 +23,9 @@ class VKSpider(scrapy.Spider):
 
 
     USER1 = 'https://vk.com/id6244012'
-    USER2 = 'https://vk.com/id30870147'  #Екатерина Дорожкина связь прямая
+    # USER2 = 'https://vk.com/id30870147'  #Екатерина Дорожкина связь прямая
     # USER2 = 'https://vk.com/id7704548' #Александра Бегун, через 1-го -- три разных графа
-    # USER2 = 'https://vk.com/id9787523' #Евгения Леонтьева, через 1-го -- три разных графа, через 2-их три разных графа
+    USER2 = 'https://vk.com/id9787523' #Евгения Леонтьева, через 1-го -- три разных графа, через 2-их три разных графа
 
     user1_id = int(USER1.replace('https://vk.com/id', '').replace('https://vk.com/', ''))
     user2_id = int(USER2.replace('https://vk.com/id', '').replace('https://vk.com/', ''))
@@ -36,7 +37,7 @@ class VKSpider(scrapy.Spider):
     response1 = vk_api.friends.get(user_id=user1_id,v="5.8")
     user1_friends = response1["items"]
 
-    user1_friends = [30870147,4921405,6182129,278075880] # тимофеев [гегельская, берсенев, рыжова] - Уровень 0 и 1
+    # user1_friends = [30870147,4921405,6182129,278075880] # тимофеев [гегельская, берсенев, рыжова] - Уровень 0 и 1
     # user1_friends = [560056, 803898]  # [зейбель, тимшин] - Уровень 2
     # user1_friends = [560056]
 
@@ -44,31 +45,35 @@ class VKSpider(scrapy.Spider):
     graph[0] = user1_id
     # друзья первого уровня
     def parse(self, response: HtmlResponse):
-        for user in self.user1_friends:
+        #проверим первый уровень друзей
+        for idx, user in enumerate(self.user1_friends):
             self.graph[1] = user
-            print(f'PARSE: ({user}, {self.get_username(user)}) user of first level. Number of Friends: {len(self.user1_friends)}')
+            print(f'PARSE FIRST LEVEL: ({user}, {self.get_username(user)})')
             if user == self.user2_id:
                 print('PARSE: Граф найден на первом уровне')
                 print(self.graph)
                 graph_ = list(filter(lambda x: x != None, self.graph))
+                time.sleep(1)
                 graph_names_ = list(map(lambda x: self.get_username(x), graph_))
-                item = GraphItem(
-                    user1={
-                        "link": self.USER1,
-                        "id": self.user1_id,
-                        "username": self.get_username(self.user1_id)
-                    },
-                    user2={
-                        "link": self.USER2,
-                        "id": self.user2_id,
-                        "username": self.get_username(self.user2_id)
-                    },
-                    graph_id=tuple(graph_),
-                    graph_username=graph_names_,
-                )
+                time.sleep(1)
+                item = GraphItem(user1={
+                                    "link": self.USER1,
+                                    "id": self.user1_id,
+                                    "username": self.get_username(self.user1_id)
+                                },
+                                user2={
+                                    "link": self.USER2,
+                                    "id": self.user2_id,
+                                    "username": self.get_username(self.user2_id)
+                                },
+                                graph_id=tuple(graph_),
+                                graph_username=graph_names_,
+                                )
                 yield item
-                self.close(VKSpider,"Graph found")
+                raise CloseSpider('We found graph')
 
+        #на первом уровне искомого графа нет, поищем на подуровнях
+        for idx, user in enumerate(self.user1_friends):
             user_path = 'https://vk.com/id'+ str(user)
             yield response.follow(user_path,
                                   callback=self.f_parse,
@@ -102,7 +107,9 @@ class VKSpider(scrapy.Spider):
                 print(f'F_PARSE(user:{user_id}): graph has been found on level:{f_level} user(idx:{idx}, {f}, {self.get_username(f)})!')
                 print(self.graph)
                 graph_ = list(filter(lambda x: x != None, self.graph))
+                time.sleep(1)
                 graph_names_ = list(map(lambda x: self.get_username(x), graph_))
+                time.sleep(1)
                 item = GraphItem(
                     user1={
                         "link": self.USER1,
@@ -118,7 +125,7 @@ class VKSpider(scrapy.Spider):
                     graph_username=graph_names_,
                 )
                 yield item
-                self.close(VKSpider, "Graph found")
+                raise CloseSpider('We found graph')
 
             f_path = 'https://vk.com/id'+ str(f)
             yield response.follow(
@@ -133,6 +140,10 @@ class VKSpider(scrapy.Spider):
         username = None
         try:
             info = self.vk_api.users.get(user_id=user, v="5.8")
+            # data = info.json()
+            #
+            # if 'error' in data and 'error_code' in data['error'] and data['error']['error_code'] == 6:
+            #     time.sleep(0.5)
 
             first_name = info[0]["first_name"]
             last_name = info[0]["last_name"]

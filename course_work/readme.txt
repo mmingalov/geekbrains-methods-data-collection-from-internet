@@ -1,25 +1,23 @@
-Курсовая:
-Рессурс на выбор или VK, или FB
+VK.com social network
 
-Ваша задача на старте паука принять 2 сслыки на странички пользователей (людей)
-Найти самую короткую цепочку рукопожатий именно составля ее из общих друзей
+On start Spider gets 2 links on VK user accounts. Algorithm task is: to find the shortest chain of handshakes by composing it from mutual friends
 https://ru.wikipedia.org/wiki/Теория_шести_рукопожатий
 
 В результате у вас должна быть база данных в которой примерно такая структура ( это не принципиально):
 {
-"person_a": "url", # ссылка на персону A
-"person_b":"url", # ссылка на персону B
-chain: [<url>, <url> ....] # цепочка (список) из ссылок
+"person_a": "url", # link to person A
+"person_b":"url", # link to person B
+chain: [<url>, <url> ....] # chain (list) of links
 }
 ----------------------------------------------------------------------------------------------
-ЗАДАНИЕ реализовано двумя способами
+TASK was solved in two different ways
 
 1.
-Реализация через Scrapy Spider
+Implementation via Scrapy Spider
 
 2.
-Реализация через рекурсию без паука (см vk_recursion.py)
-Здесь логика работы имеет следующий нюанс:
-- задается глубина поиска DEPTH_LEVEL в виде натурального положительного числа, где:
-для примера, единица соответствует прямой связи, двойка -- связи через 1-го человека, тройка -- связи через двух человек.
-- алгоритм найдет и сохранит в MongoDB все возможные графы, а не ограничится только оптимальным. При этом графы могут быть с разным числом рукопожатий. Интересно было реализовать именно в таком ключе.
+Implementation via recursion without spider (see vk_recursion.py)
+Here the logic of work has the following nuance:
+- the search depth DEPTH_LEVEL is set as a natural positive number, where:
+for example, the number 1 corresponds to a direct connection, the number 2 corresponds to a connection through one person, the number three corresponds to a connection through two people.
+- the algorithm will find and save all possible graphs in MongoDB, and will not be limited to only the optimal one. In this case, graphs can be with a different number of handshakes. It was interesting to implement it in this vein.

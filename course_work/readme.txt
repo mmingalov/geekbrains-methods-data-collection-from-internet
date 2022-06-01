@@ -3,7 +3,7 @@ VK.com social network
 On start Spider gets 2 links on VK user accounts. Algorithm task is: to find the shortest chain of handshakes by composing it from mutual friends
 https://ru.wikipedia.org/wiki/Теория_шести_рукопожатий
 
-В результате у вас должна быть база данных в которой примерно такая структура ( это не принципиально):
+In result we have to get Mongo DB with next structure:
 {
 "person_a": "url", # link to person A
 "person_b":"url", # link to person B
